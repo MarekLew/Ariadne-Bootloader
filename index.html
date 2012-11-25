@@ -28,32 +28,292 @@
         </ul>
       </header>
       <section>
-        <h3>Welcome to GitHub Pages.</h3>
+        <h1>Ariadne Bootloader for Arduino and WizNet W5100</h1>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<h2>Bootloader for Arduino with Ethernet</h2>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<p>This is a beta stage bootloader for Arduino Ethernet board and the regular
+Arduino with Ethernet Shield. It is based on previous unfinished work by the Arduino
+developers. The bootloader implements a TFTP server on the Arduino board and flashing works
+using any regular TFTP client.</p>
+
+<h2>The Files and Folders in this Repository</h2>
+
+<p>The structure of this repository is made to follow the standarts of the Arduino IDE.
+This way you can simply copy the folders in your sketchbook and be ready</p>
+
+<ul>
+<li>hardware: This is where the bootloader resides.</li>
+<li>java-client: Demo client for the bootloader. Inherited by the initial project. Untested and probably non-functional</li>
+<li>libraries: Helper libraries to support functions of the bootloader</li>
+<li>utilities: Various stuff used for development and debugging</li>
+</ul><h2>Downloading and Installing Files</h2>
+
+<p>First of all, you need to clone or download the repository. To clone the repository
+you need to have git installed, then you can run
+<code>git clone https://github.com/codebendercc/Ariadne-Bootloader.git</code>
+in a directory.
+This way you can later update your local repository by running
+<code>git pull</code>
+inside the <strong>Ariadne-Bootloader</strong> directory.</p>
+
+<p>In case you want to avoid this hassle, you can use the <strong>ZIP</strong> button at the top of the page
+to download the latest snapshot of the repository in a zip archive and extract it.</p>
+
+<p>After that you have to copy the <strong>hardware</strong> and <strong>libraries</strong> folders inside your sketchbook folder.
+Take extra care during coping not to overwrite any other files. Restart the Arduino IDE to load
+the new boards and libraries.</p>
+
+<h2>Installing the Bootloader</h2>
+
+<p>To burn the bootloader, you will need an <a href="http://www.atmel.com/dyn/products/tools_card.asp?tool_id=2726">AVR-ISP</a>
+(in-system programmer), <a href="http://www.ladyada.net/make/usbtinyisp/">USBtinyISP</a> or you can build a
+<a href="http://arduino.cc/en/Hacking/ParallelProgrammer">ParallelProgrammer</a> or an
+<a href="http://arduino.cc/en/Tutorial/ArduinoISP">ArduinoISP</a>.
+The first three programmers should be connected to the ICSP pins (the 2 by 3 pin header) and make sure you plug
+it in the right way. The board must be powered by an external power supply or the USB port. In the case of <em>ArduinoISP</em>
+you should consult the above link for further instructions on how to build and use.</p>
+
+<p>After you have connected the Arduino board and the programmer to your computer launch the Arduino IDE.
+Navigate to the <strong>Tools</strong> &gt; <strong>Board</strong> menu and select <code>Arduino Duemilanove/Uno(ATmega328) w/ Ariadne Bootloader</code>
+if you have an Arduino Duemilanove or Uno with an Ethernet Shield or <code>Arduino Ethernet w/ Ariadne Bootloader</code>
+for Arduino Ethernet. Then go to <strong>Tools</strong> &gt; <strong>Programmer</strong> and select the programmer you are using.
+In case you are using <em>ArduinoISP</em>, make sure that the selected port in the <strong>Tools</strong> &gt; <strong>Serial Port</strong> menu refers to
+the <em>ArduinoISP</em> and not the board that you want to burn the bootloader on. Now, just launch the <strong>Tools</strong> &gt; <strong>Burn Bootloader</strong>
+command and wait for about 15 seconds for the operation to complete.</p>
+
+<h2>Serial Flashing</h2>
+
+<p>Ariadne bootloader supports flashing through serial like any other regular bootloader. This way of uploading is
+built upon the very good <em>Optiboot</em> bootloader so it should be pretty straight forward to use. Just plug in the USB
+cable and select the serial port and the appropriate board from the <strong>Tools</strong> &gt; <strong>Board</strong> menu. After that you must press the
+reset button and the indication LED on <strong>pin 13</strong> or <strong>pin 9</strong>, in case of Arduino Ethernet, will start blinking rapidly.
+This means that the bootloader is running and the Arduino is ready to be programmed. If there is a <strong>valid</strong> program already
+flashed on the Arduino, you have to reprogram the device in the next <strong>5 seconds</strong>. If you don't, the bootloader will
+initiate the program that is already in the Arduino. In case there is no program flashed or the program has been marked
+as <strong>invalid</strong>, the bootloader will never time out and you can reprogram it at any time.</p>
+
+<p>After a succesful flashing,</p>
+
+<ul>
+<li>
+<em>Arduino Duemilanove</em> will automatically start the user's application.</li>
+<li>
+<em>Arduino Uno</em> will do a reset cycle and start the program after the bootloader times out.</li>
+</ul><p>This happens because <em>Uno</em> has the autoreset feature that resets the board after a serial connection.</p>
+
+<p>Due to the fact that "autoreset" for remote tftp programming is implemented using a watchddog timer timeout, the bootloader
+will do a full cycle after every reset, physical or software. For those who want <em>Adaboot No-Wait Mod</em>-like functionality,
+we have been testing some options on how to circumvent these limitations, but they still need refinement.</p>
+
+<h2>Default Network Settings</h2>
+
+<p>The default built-in network settings of the bootloader are listed below.</p>
+
+<pre><code>* IP Address:  192.168.1.128
+* Subnet Mask: 255.255.255.0
+* Gateway:     192.168.1.1
+* MAC Address: 0xDE.0xAD.0xBE.0xEF.0xFE.0xED
+* TFTP Negotiation Port: 69
+* TFTP Data Port: 46969
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p><strong><em>NOTE:</em></strong> The Arduino Ethernet that were sent as Indiegogo Perks were flashed with different network settings.
+Their bootloader still defaults to the previous settings <strong><em>but</em></strong> the current values are on the accompaning leaflet.</p>
 
-<h3>Designer Templates</h3>
+<h2>Configuring Network Settings</h2>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p>These can be changed using our <strong>NetEEPROM</strong> library. The library is going to have it's own documentation on how it
+can be used but for the purpose of changing and reading the network settings you can use the included examples. To load
+them navigate to <strong>File</strong> &gt; <strong>Examples</strong> &gt; <strong>NetEEPROM</strong> and select one of the examples. You can write the network
+settings using the <strong>WriteNetworkSettings</strong> sketch or print them to the serial using the <strong>ReadNetworkSettings</strong>.</p>
 
-<h3>Rather Drive Stick?</h3>
+<p>Note that the settings array in the <strong>WriteNetworkSettings</strong> sketch hasn't got the settings in the usual order but
+rather in the order that <strong>W5100</strong> reads them, so make sure you have put the correct values. If you set the network
+settings you also have to set the TFTP data transfer port. The default is good enough but you may need to change it
+for the reasons that are listed below in the
+<a href="https://github.com/codebendercc/Ariadne-Bootloader#configuring-your-router-for-remote-flashing">Configuring your Router for Remote Flashing</a>
+section. There is also documentation on how use these sketches in the form of comments so be sure to read them.</p>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<h2>TFTP Flashing</h2>
 
-<h3>Authors and Contributors</h3>
+<p>Now for the real reason we made this bootloader and why you should use it. First of all you can watch <strong>Ariadne</strong> in
+action in this how-to video for remote flashing using TFTP <a href="http://youtu.be/KCHqhV6xPMg">here</a>. In the video you may
+notice that the board is being reset by hand. In the next couple of weeks we are going to release the library that will
+allow remote resetting through a simple web server with some security measures. More on that as the library progresses.</p>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<h5>Converting your sketch to the right format</h5>
 
-<h3>Support or Contact</h3>
+<p>Unlike serial flashing that uses <strong>HEX</strong> files to flash the Arduino, the TFTP server implemented in the bootloader works
+with binary files. This means that you have to manually convert your programs to the right format. To do that, first build
+your sketch inside <em>Arduino IDE</em> using the <strong>Verify</strong> button. After that, without exiting the <em>Arduino IDE</em> you need
+to navigate to the temporary directory where your project was built. That is <code>C:\Users\owner\AppData\Local\Temp\</code>
+on <em>Windows</em>, <code>/tmp</code> on <em>Linux</em>. On <em>MacOS</em>  you'll need to go to Arduino's prefferences, and check the
+"Show verbose output during compilation" checkbox. After that, when you compile, you will see the path for the compiled .hex
+file in the last line of the compilation output.. There you will find a folder named something like <code>build2429295348207572157.tmp</code>.
+That is where the Arduino temporary build files reside. Enter the directory and make sure that there is a <code>.elf</code>
+or a <code>.hex</code> file with the same name as your sketch. That is the file you need to convert. To achieve that you have to
+run one of the following commands in a terminal.</p>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<ul>
+<li><code>avr-objcopy -j .text -j .data -O binary [sketch].elf [sketch].bin</code></li>
+<li><code>avr-objcopy -I ihex [sketch].hex -O binary [sketch].bin</code></li>
+</ul><p>In Windows and MacOS you can find the <code>avr-objcopy</code> program in your Arduino IDE installation folder under <code>hardware/tools/avr/bin/</code>.
+Or,if you have scons installed, you can use the modified <code>SConstruct</code> script you can find in <code>Ariadne-Bootloader/utilities</code>.
+This being based on the <em>arscons</em> script, it can be used in two ways. If you used the previous process to generate the <em>HEX</em>
+file you can just copy the <code>SConstruct</code> file inside the temporary <em>Arduino IDE</em> build directory (as mentioned above)
+and run <code>scons</code> in a terminal inside that directory.</p>
+
+<p>The other way to use it is to copy the <code>SConstruct</code> script inside the sketch's directory and, as above, run
+<code>scons</code> in a terminal inside that directory. This way you will build your project outside <em>Arduino IDE</em> creating
+the <code>.bin</code> file in the process. Note that this way the sketch's folder will be polluted with Arduino's build files,
+much like the temporary directory <em>Arduino IDE</em> uses.</p>
+
+<p>For testing purposes you can find a <strong>blink</strong> sketch in binary form inside the <code>Ariadne-Bootloader/utilities/tests/blink</code>
+folder. The <strong>fade</strong> sketch in the <code>tests/fade</code> folder will also give you a view of what a failed upload looks like.
+This sketch fails because it is written in plain <strong>C</strong> and not in <strong>Arduino</strong>. That way it lacks some "signatures" the
+bootloader uses to validate <em>Arduino</em> sketches. The third sketch in <code>tests/led_display</code> is an easter egg for which you
+need to find out how we had our led matrices connected on <em>Arduino Uno</em>. Or we might release the schematics at some point.
+Who knows.</p>
+
+<h5>Using a tftp client to upload the sketch</h5>
+
+<p>Now that the binary is ready, you have to upload it. First you have to connect to your Arduino using any tftp client you
+may have on your computer. All three major operating systems have their own clients that you can use through the command line.
+On some <strong>Linux</strong> distributions, like <strong>Fedora/RedHat</strong>, before you use <code>tftp</code>, you should load the <code>ip_conntrack_tftp</code>
+module or the tftp client won't be able to <strong>ACK</strong> the packets sent. That is needed because TFTP is insecure and it is not
+enabled by default. Other distributions like <strong>Arch</strong>, don't need this step. To do that, open a terminal and run</p>
+
+<pre><code>modprobe ip_conntrack_tftp
+</code></pre>
+
+<p>as <strong>root</strong> using <code>su</code> or <code>sudo</code>.</p>
+
+<p>After that open a terminal as a regular user and type <code>tftp [ip] [port]</code>. For the default bootloader settings that would be:</p>
+
+<pre><code>tftp 192.168.1.128 69
+</code></pre>
+
+<p>In this case it could just be <code>tftp 192.168.1.128</code> as <strong>69</strong> is the default tftp port and the client would automatically
+connect to it. For any other port you have to explicitly set it.</p>
+
+<p>Now you should have been greeted by the <code>tftp&gt;</code> prompt. First you have to enter this command:</p>
+
+<pre><code>tftp&gt; mode octet
+</code></pre>
+
+<p>This way you tell the <strong>TFTP</strong> client to send binary data. This is absolutely needed as if your client is in netascii
+mode, uploading will fail. After this, it is advised to use the two following commands to make the process more informative
+so you can have a better view of what is happening, but they are not needed.</p>
+
+<pre><code>tftp&gt; trace
+tftp&gt; verbose
+</code></pre>
+
+<p>Now to actually upload the binary file all you have to do is <strong>reset</strong> the board and in the next <strong>5 seconds</strong> run
+the following command.</p>
+
+<pre><code>tftp&gt; put [sketch].bin
+</code></pre>
+
+<p>The <strong>5 second</strong> time frame is in case you already have a valid program uploaded on the Arduino. In case you don't have
+a program loaded or it has been marked invalid, you don't have any time constraints.</p>
+
+<p>Now you should see your tftp client sending packets and the indication LED on <strong>pin 13</strong> or <strong>pin 9</strong> blinking in a random
+way, almost like having a hiccup. A correct output sample of the TFTP client uploading the <em>blink</em> sketch is below:</p>
+
+<pre><code>tftp&gt; mode octet
+</code></pre>
+
+<pre><code>tftp&gt; trace
+Trace mode on.
+</code></pre>
+
+<pre><code>tftp&gt; verbose
+Verbose mode on.
+</code></pre>
+
+<pre><code>tftp&gt; put blink.bin
+sent WRQ &lt;file: blink.bin, mode: octet &lt;&gt;&gt;
+received ACK &lt;block: 0&gt;
+sent DATA &lt;block: 1, size: 512&gt;
+received ACK &lt;block: 1&gt;
+sent DATA &lt;block: 2, size: 512&gt;
+received ACK &lt;block: 2&gt;
+sent DATA &lt;block: 3, size: 512&gt;
+received ACK &lt;block: 3&gt;
+sent DATA &lt;block: 4, size: 512&gt;
+received ACK &lt;block: 4&gt;
+sent DATA &lt;block: 5, size: 42&gt;
+received ACK &lt;block: 5&gt;
+tftp&gt;
+</code></pre>
+
+<p>After a successful upload the bootloader will start the uploaded application instantly.</p>
+
+<p>In case that for some reason the upload fails, first of all stop your TFTP client from sending any more packets. After that
+you should wait for the upload process on the bootloader to timeout. That takes about <strong>5 seconds</strong> too. For this period
+you should witness the indication led doing some random blinking. After the timeout and since there is no valid program
+in the memory, the TFTP server should restart itself and wait for a new upload.</p>
+
+<h2>Configuring your Router for Remote Flashing</h2>
+
+<p>If you are having troubles flashing your Arduino at home from the road, you probably need to enable
+<a href="http://en.wikipedia.org/wiki/Port_forwarding">port forwarding</a>. You need to forward ports <strong>69</strong> and <strong>46969</strong> to your
+Arduino in your router's configuration. In case you have changed the incoming data port from <strong>46969</strong> to another port
+i.e. <strong>50232</strong>, you have to forward <strong>50232</strong> port instead of <strong>46969</strong>. This is particularly useful when
+you have more than one Arduinos, that you want to flash, behind your router. In addition to this you are going to have
+to translate an external port of your choice on the router to the internal port and ip of the Arduino in the local network.
+An example is that you have 2 devices, one at <em>192.168.1.128</em> and one at <em>192.168.1.129</em>. They both listen to port
+<strong>69</strong> for the initial connection. In this case you can translate external port <strong>6969</strong>(any random port will do) on
+your router to <em>192.168.1.128</em>:__69__ and external port <strong>6970</strong> to <em>192.168.1.129</em>:__69__ and specify these in the
+tftp client you are using.</p>
+
+<p>Port Forward has <a href="http://portforward.com/english/routers/port_forwarding/">excellent guides</a> on how to enable port
+forwarding for a vast number of routers.</p>
+
+<h2>Codebender</h2>
+
+<p>One of the best ways and easiest ways to use this bootloader is along with <a href="http://codebender.cc">codebender.cc</a>.
+Just register, enter your Arduino's IP (external IP for those in corporate or home networks behind NAT) and flash.</p>
+
+<h2>Supported Boards</h2>
+
+<p>Right now the <strong>ATmega328</strong> processor and the <strong>WizNet W5100</strong> ethernet controller are supported. That means
+that your Arduino Uno, Arduino Duemilanove, Arduino Ethernet or any Arduino compatible board using these chipsets
+can be burned with the Ariadne bootloader. If you have the know-how you can probably compile the bootloader for other
+processors but note that we haven't tested it. The following list will be updated over time.</p>
+
+<ul>
+<li><a href="www.arduino.cc/en/Main/ArduinoBoardEthernet">Arduino Ethernet</a></li>
+<li><a href="http://www.arduino.cc/en/Main/ArduinoBoardUno">Arduino Uno</a></li>
+<li><a href="http://www.arduino.cc/en/Main/ArduinoBoardDuemilanove">Arduino Duemilanove w/ ATmega328</a></li>
+</ul><h2>Other Tested Boards</h2>
+
+<p>These boards have been also tested and found to be working with Ariadne Bootloader. I don't have any of these so
+a big <strong><em>thank you</em></strong> goes to the people that took their time to test them.</p>
+
+<ul>
+<li><a href="http://imall.iteadstudio.com/im120410001.html">ITead Studio IBoard</a></li>
+<li><a href="https://www.sparkfun.com/products/10536">Sparkfun Ethernet Pro</a></li>
+</ul><h2>Roadmap</h2>
+
+<p>Right now the main focus for the first packaged release is bug fixing and improve existing functionality. That is why we
+encourage you to use the bootloader and report any bugs, misbehaviours or feature requests here on github. There is
+also on going work to work on the Arduino Mega and support for Arduino Leonardo is planned after that. Support for
+other ethernet or wifi controllers is being discussed but after the bootloader has been stabilized.</p>
+
+<h2>Acknoledgements</h2>
+
+<p><strong>Ariadne</strong> bootloader is built upon some great open source projects. First of all is the <a href="https://github.com/arduino/TFTP-Bootloader">TFTP-Bootloader</a> from the
+<em>Arduino Team</em>. This is our base and we tried to stay on path with what they wanted to make. Serial flashing was made
+possible by <a href="https://code.google.com/p/optiboot/">Optiboot</a> project's bootloader. Credit should also go to <a href="https://github.com/mharizanov">mharizanov</a> for
+commenting some of the initial <em>Arduino</em> code, making it easy for me to start and <a href="https://github.com/follower">follower</a>
+who's sketches served as a starting point for the included <strong>NetEEPROM</strong> and <strong>EthernetReset</strong> libraries.</p>
+
+<h2>License</h2>
+
+<p>This is free software and it is released under the <a href="https://www.gnu.org/licenses/gpl-2.0.html">GPLv2, GNU General Public License</a></p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/codebendercc">codebendercc</a></p>
